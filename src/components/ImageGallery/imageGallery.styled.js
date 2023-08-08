@@ -4,7 +4,7 @@ export const GalleryContainer = styled.ul`
     display: flex;
     flex-wrap: wrap;
 
-    height: 80vh;
+    // height: 80vh;
 
     gap: 1rem;
     padding: 1rem 2rem;

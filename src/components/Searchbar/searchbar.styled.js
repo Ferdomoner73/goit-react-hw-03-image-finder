@@ -39,6 +39,8 @@ export const SearchInput = styled(Field)`
     background-color: transparent; 
     border: none;
     outline: none;
+
+    width: 100%;
 ` 
 
 export const SearchIcon = styled(FcSearch)`

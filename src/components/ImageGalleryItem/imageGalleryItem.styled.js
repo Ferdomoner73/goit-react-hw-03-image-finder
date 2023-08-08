@@ -2,7 +2,14 @@ import styled from "@emotion/styled";
 
 export const GalleryItemContainer = styled.li`
     width: calc(((100% - 1rem * 3)/4));
-    height: calc(((100% - 1rem * 3)/3));
+    height: 10vh;
+
+    @media (min-width: 768px) {
+        height: 15vh;
+    }
+    @media (min-width: 1440px) {
+        height: 25vh;
+    }
 `
 
 export const GalleryItemImg = styled.img`

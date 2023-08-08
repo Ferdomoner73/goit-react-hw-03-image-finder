@@ -1,10 +1,14 @@
 import { PureComponent } from 'react';
 
+import { css, Global } from '@emotion/react';
+import modernNormalize from 'modern-normalize';
+
 import { Container } from './app.styled';
 
 import { Searchbar } from './Searchbar';
 import { ImageGallery } from './ImageGallery';
 import { Button } from './Button';
+import { Loader } from './Loader';
 
 import { fetchData } from '../api/search';
 
@@ -12,7 +16,7 @@ const INITIAL_VALUES = {
   searchValue: '',
   page: 1,
   images: [],
-  status: 'tofind',
+  isLoading: false,
 };
 
 export class App extends PureComponent {
@@ -21,38 +25,20 @@ export class App extends PureComponent {
   };
 
   async componentDidUpdate(_, prevState) {
-    const { searchValue, page, images } = this.state;
-
-    if (prevState.searchValue !== searchValue && searchValue !== '') {
-      if (page === 1) {
-        fetchData(searchValue, page).then(response => {
-          const filteredImages = response.hits.map(obj => {
-            return {
-              id: obj.id,
-              webformatURL: obj.webformatURL,
-              largeImageURL: obj.largeImageURL,
-            };
-          });
-          this.setState(prevState => ({
-            images: [...prevState.images, ...filteredImages],
-            page: (prevState.page += 1),
-          }));
-        });
-      }
+    const { searchValue } = this.state;
+    if (
+      prevState.searchValue.trim() !== searchValue.trim() &&
+      searchValue !== ''
+    ) {
+      this.setState({ images: [] });
+      this.saveData();
     }
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }
 
-  onSubmit = value => {
-    if (value === this.state.searchValue) return;
-    this.setState({ searchValue: value.searchField, page: 1, images: [] });
-  };
-
-  handleClickLoadMore = async () => {
+  saveData = () => {
     const { searchValue, page } = this.state;
 
-    this.setState(prevState => ({
-      page: (prevState.page += 1),
-    }));
     fetchData(searchValue, page).then(response => {
       const filteredImages = response.hits.map(obj => {
         return {
@@ -63,18 +49,41 @@ export class App extends PureComponent {
       });
       this.setState(prevState => ({
         images: [...prevState.images, ...filteredImages],
+        page: (prevState.page += 1),
+        isLoading: false,
       }));
     });
   };
 
+  onSubmit = value => {
+    this.setState({
+      searchValue: value.searchField,
+      page: 1,
+      isLoading: true,
+    });
+  };
+
+  handleClickLoadMore = async () => {
+    this.setState({ isLoading: true });
+    this.saveData();
+  };
+
   render() {
-    const { images } = this.state;
+    const { images, isLoading } = this.state;
 
     return (
       <Container>
+        <Global
+          styles={css`
+            ${modernNormalize}
+          `}
+        />
         <Searchbar onSubmit={this.onSubmit} />
         <ImageGallery images={images} />
-        {images.length > 0 && <Button onClick={this.handleClickLoadMore} />}
+        {images.length > 0 && isLoading === false && (
+          <Button onClick={this.handleClickLoadMore} />
+        )}
+        {isLoading === true && <Loader />}
       </Container>
     );
   }
