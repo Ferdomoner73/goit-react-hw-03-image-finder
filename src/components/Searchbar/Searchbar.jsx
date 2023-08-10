@@ -1,4 +1,6 @@
 import { Formik, Form } from 'formik';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 import {
   SearchContainer,
@@ -32,4 +34,8 @@ export const Searchbar = ({ onSubmit }) => {
       </Formik>
     </SearchContainer>
   );
+};
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
 };

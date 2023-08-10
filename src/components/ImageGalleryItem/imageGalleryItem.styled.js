@@ -12,8 +12,21 @@ export const GalleryItemContainer = styled.li`
     }
 `
 
+export const Button = styled.button`
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    border-radius: 1rem;
+
+    border: none;
+    cursor: pointer;
+`
+
 export const GalleryItemImg = styled.img`
     width: 100%;
     height: 100%;
     object-fit: cover;
+
+    border-radius: 1rem;
 `

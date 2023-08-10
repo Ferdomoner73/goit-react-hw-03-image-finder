@@ -21,4 +21,8 @@ export const ButtonLoadMore = styled.button`
     background-color: darkblue;
     color: white;
     cursor: pointer;
+
+    &:hover {
+        background-color: blue;
+    }
 `   
