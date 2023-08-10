@@ -3,7 +3,7 @@ import { PureComponent } from 'react';
 import { css, Global } from '@emotion/react';
 import modernNormalize from 'modern-normalize';
 
-import { Container, ModalImg } from './app.styled';
+import { Container, ModalImg, NoImagesAlert } from './app.styled';
 
 import { Searchbar } from './Searchbar';
 import { ImageGallery } from './ImageGallery';
@@ -20,6 +20,7 @@ const INITIAL_VALUES = {
   chosenImg: null,
   isLoading: false,
   isShowModal: false,
+  isNothing: false,
   activeImgUrl: null,
 };
 
@@ -29,7 +30,7 @@ export class App extends PureComponent {
   };
 
   async componentDidUpdate(_, prevState) {
-    const { searchValue } = this.state;
+    const { searchValue, images } = this.state;
 
     if (
       prevState.searchValue.trim() !== searchValue.trim() &&
@@ -37,6 +38,10 @@ export class App extends PureComponent {
     ) {
       this.setState({ images: [] });
       this.saveData();
+    }
+
+    if (images.length > 1) {
+      this.setState({ isNothing: false });
     }
 
     if (prevState.isLoading !== this.state.isLoading) {
@@ -62,23 +67,32 @@ export class App extends PureComponent {
     }
   };
 
-  saveData = () => {
+  saveData = async () => {
     const { searchValue, page } = this.state;
 
-    fetchData(searchValue, page).then(response => {
-      const filteredImages = response.hits.map(obj => {
-        return {
+    try {
+      const response = await fetchData(searchValue, page);
+      if (response.hits.length === 0) {
+        this.setState({
+          isLoading: false,
+          isNothing: true,
+        });
+      } else {
+        const filteredImages = response.hits.map(obj => ({
           id: obj.id,
           webformatURL: obj.webformatURL,
           largeImageURL: obj.largeImageURL,
-        };
-      });
-      this.setState(prevState => ({
-        images: [...prevState.images, ...filteredImages],
-        page: (prevState.page += 1),
-        isLoading: false,
-      }));
-    });
+        }));
+
+        this.setState(prevState => ({
+          images: [...prevState.images, ...filteredImages],
+          page: prevState.page + 1,
+          isLoading: false,
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
   onSubmit = value => {
@@ -101,7 +115,7 @@ export class App extends PureComponent {
   };
 
   render() {
-    const { images, isLoading, isShowModal, chosenImg } = this.state;
+    const { images, isLoading, isShowModal, chosenImg, isNothing } = this.state;
 
     return (
       <Container>
@@ -116,6 +130,9 @@ export class App extends PureComponent {
           <Button onClick={this.handleClickLoadMore} />
         )}
         {isLoading && <Loader />}
+        {isNothing && !isLoading && (
+          <NoImagesAlert>Nothing was found</NoImagesAlert>
+        )}
         {isShowModal && (
           <Modal
             isShowModal={isShowModal}
